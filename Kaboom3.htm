@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaboom Ultra Pro + Editor</title>
+<style>
+:root{--bg:#0b1020;--card:#121a33;--accent:#38bdf8;--good:#22c55e;--bad:#ef4444;--muted:#64748b}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;background:linear-gradient(180deg,#0b1020,#020617);color:#e5e7eb}
+header{position:sticky;top:0;background:rgba(2,6,23,.8);backdrop-filter: blur(8px);padding:10px;display:flex;justify-content:space-between}
+.container{max-width:720px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px}
+.cell{background:#1b2550;border-radius:12px;padding:16px;text-align:center;cursor:pointer}
+.cell.revealed{background:#020617}
+.controls{display:flex;gap:8px;justify-content:center;padding:8px}
+button{border:none;border-radius:10px;padding:8px 10px}
+#modal,#editor{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center}
+.card{background:#121a33;padding:15px;border-radius:12px;width:90%;max-width:500px}
+input,textarea,select{width:100%;margin:5px 0;padding:6px;border-radius:6px;border:none}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div>💣 Kaboom</div>
+<div>Puntos: <span id="score">0</span></div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div id="history" style="padding:10px;font-size:13px;display:flex;gap:6px;flex-wrap:wrap"></div>
+
+<div class="controls">
+<button onclick="newGame()">Nueva</button>
+<button onclick="toggleAnswers()" id="toggleBtn">Respuesta: SI</button>
+<button onclick="openEditor()">🧠 Editor</button>
+</div>
+
+</div>
+
+<div id="modal"><div class="card">
+<div id="qText"></div>
+<div id="aText"></div>
+<button onclick="answer(true)">✔</button>
+<button onclick="answer(false)">✖</button>
+</div></div>
+
+<div id="editor"><div class="card">
+<h3>Editor de preguntas</h3>
+<select id="qSelect" onchange="loadSelected()"></select>
+<textarea id="newQ" placeholder="Pregunta"></textarea>
+<input id="newA" placeholder="Respuesta (opcional)">
+<button onclick="addQ()">Añadir</button>
+<button onclick="updateQ()">Editar</button>
+<button onclick="deleteQ()">Borrar</button>
+<button onclick="exportJSON()">Exportar JSON</button>
+<input type="file" onchange="importJSON(event)">
+<button onclick="closeEditor()">Cerrar</button>
+</div></div>
+
+<script>
+let score=0,currentCell=null,showAnswer=true,history=[];
+let questions=[];
+let selectedIndex=null;
+
+function saveLocal(){localStorage.setItem('questions',JSON.stringify(questions))}
+
+async function loadQuestions(){
+  try {
+    const res = await fetch('preguntas.json');
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      questions = data;
+      console.log("Cargado desde JSON");
+      return;
+    }
+  } catch(e) {
+    console.warn("No se pudo cargar JSON");
+  }
+
+  // fallback a localStorage
+  let q = localStorage.getItem('questions');
+  if (q) {
+    questions = JSON.parse(q);
+    console.log("Cargado desde localStorage");
+  } else {
+    questions = [{q:'2+2', a:'4'}];
+    console.log("Fallback básico");
+  }
+}
+
+function renderSelect(){
+ qSelect.innerHTML=questions.map((q,i)=>`<option value="${i}">${q.q}</option>`).join('');
+}
+
+function loadSelected(){
+ selectedIndex=qSelect.value;
+ let q=questions[selectedIndex];
+ newQ.value=q.q;
+ newA.value=q.a||'';
+}
+
+function addQ(){
+ let q=newQ.value.trim(); if(!q)return;
+ questions.push({q:q,a:newA.value.trim()});
+ saveLocal();renderSelect();
+}
+
+function updateQ(){
+ if(selectedIndex===null)return;
+ questions[selectedIndex]={q:newQ.value,a:newA.value};
+ saveLocal();renderSelect();
+}
+
+function deleteQ(){
+ if(selectedIndex===null)return;
+ questions.splice(selectedIndex,1);
+ saveLocal();renderSelect();
+ newQ.value='';newA.value='';
+}
+
+function exportJSON(){
+ let blob=new Blob([JSON.stringify(questions,null,2)],{type:'application/json'});
+ let a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download='preguntas.json';a.click();
+}
+
+function importJSON(e){
+ let file=e.target.files[0];
+ let reader=new FileReader();
+ reader.onload=()=>{
+  try{questions=JSON.parse(reader.result);saveLocal();renderSelect();}
+  catch{alert('JSON inválido')}
+ };
+ reader.readAsText(file);
+}
+
+function openEditor(){editor.style.display='flex';renderSelect()}
+function closeEditor(){editor.style.display='none'}
+
+let items=[];
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+function buildItems(){items=[...Array(20).fill('question'),...Array(5).fill('kaboom'),...Array(5).fill('heart')];shuffle(items)}
+
+function updateHistory(){
+ document.getElementById('history').innerHTML = history.map(h=>`<span style='background:#111827;border-radius:8px;padding:4px 6px'>${h}</span>`).join('');
+}
+
+function handleClick(cell,type){
+ if(cell.dataset.revealed)return;
+ cell.dataset.revealed=true;
+ if(type==='heart'){score+=5;cell.innerHTML='❤️+5';history.push('+5');updateHistory()}
+ else if(type==='kaboom'){score-=5;cell.innerHTML='💣-5';history.push('-5');updateHistory()}
+ else{
+  currentCell=cell;
+  let q=questions[Math.floor(Math.random()*questions.length)];
+  qText.innerText=q.q;
+  aText.innerText=showAnswer?(q.a||''):'';
+  modal.style.display='flex';
+ }
+ scoreEl.innerText=score;
+}
+
+function answer(ok){modal.style.display='none';
+ if(ok){score+=4;currentCell.innerHTML='Q+4';history.push('+4')}
+ else{currentCell.innerHTML='Q0';history.push('0')} updateHistory()
+ scoreEl.innerText=score;
+}
+
+function toggleAnswers(){showAnswer=!showAnswer;toggleBtn.innerText=showAnswer?'Respuesta: SI':'Respuesta: NO'}
+
+function newGame(){
+ history=[];updateHistory();
+ score=0;scoreEl.innerText=0;buildItems();grid.innerHTML='';
+ items.forEach((t,i)=>{
+  let c=document.createElement('div');c.className='cell';
+  c.innerText=String.fromCharCode(65+(i%6))+(Math.floor(i/6)+1);
+  c.onclick=()=>handleClick(c,t);
+  grid.appendChild(c);
+ });
+}
+
+const grid=document.getElementById('grid');
+const scoreEl=document.getElementById('score');
+const modal=document.getElementById('modal');
+const qText=document.getElementById('qText');
+const aText=document.getElementById('aText');
+const editor=document.getElementById('editor');
+const qSelect=document.getElementById('qSelect');
+const newQ=document.getElementById('newQ');
+const newA=document.getElementById('newA');
+const toggleBtn=document.getElementById('toggleBtn');
+
+(async () => {
+  await loadQuestions();
+  newGame();
+})();
+
+</script>
+</body>
+</html>
