@@ -183,12 +183,10 @@ function newGame(){
 }
 
 function clickCell(cell,type){
- if (document.querySelectorAll('.cell:not(.flip)').length === 0) {
-   endGame();
- }
-
  if(cell.classList.contains('flip')) return;
- cell.classList.add('flip');
+
+ cell.classList.add('flip'); // 👈 primero giramos
+
  let back = cell.querySelector('.back');
 
  if(type==='heart'){
@@ -203,16 +201,23 @@ function clickCell(cell,type){
  }
  else{
   if(questions.length===0){ endGame(); return; }
+
   currentCell=back;
   let q=questions.pop();
+
   document.getElementById('q').innerText=q.q;
   document.getElementById('a').innerText=q.a;
   document.getElementById('a').style.display='none';
   modal.style.display='flex';
  }
+
+ // 👇 AHORA sí comprobamos
+ if (document.querySelectorAll('.cell:not(.flip)').length === 0) {
+   endGame();
+ }
+
  updateUI();
 }
-
 function toggleAnswer(){
  let a=document.getElementById('a');
  a.style.display = a.style.display==='none'?'block':'none';
