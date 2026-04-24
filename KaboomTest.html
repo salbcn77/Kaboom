@@ -112,7 +112,7 @@ function selectPlayers(n){
   html += `<input class="playerInput" id="p${i}" value="${def}">`;
  }
  inputs.innerHTML = html;
- inputs.dataset.n = n;
+ let n = parseInt(document.querySelectorAll('.playerInput').length);
  options.style.display='block';
  startBtn.style.display = 'block';
 
@@ -121,7 +121,11 @@ function selectPlayers(n){
 }
 
 async function startGame(){
- let n = inputs.dataset.n;
+ let n = parseInt(inputs.dataset.n);
+ if (!n) {
+   alert("Selecciona número de jugadores");
+   return;
+ }
  players=[]; scores=[];
 
  for(let i=0;i<n;i++){
