@@ -4,35 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kaboom</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="apple-touch-icon" href="icon-192.png">
 
 <style>
-body {margin:0;font-family:'Poppins';background:#0b1020;color:white}
-#splash {position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px}
-.container {max-width:700px;margin:auto;display:none;padding:10px}
-.header {display:flex;align-items:center;gap:10px;font-size:20px;font-weight:600}
-.grid {display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 0}
-.cell {perspective:1000px;height:70px}
-.inner {width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:0.5s}
-.cell.flip .inner {transform:rotateY(180deg)}
-.face {position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:10px;backface-visibility:hidden;background:#1b2550;font-weight:600}
-.back {transform:rotateY(180deg);background:#020617}
-button {padding:10px;border:none;border-radius:8px;cursor:pointer}
-input {padding:8px;border-radius:6px;border:none}
-#modal,#endModal {position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85)}
-.card {background:#121a33;padding:20px;border-radius:12px;text-align:center;width:90%;max-width:400px}
-.actions {display:flex;gap:10px;justify-content:center;margin-top:10px}
-.playerBoard {display:flex;justify-content:space-around;margin-top:10px}
-.active {outline:2px solid #38bdf8}
-.playerInput {display:block;width: 80%;max-width: 250px;margin: 8px auto;padding:10px;font-size:16px}
-.optionRow {display:flex;justify-content:space-between;align-items:center;width:220px;margin:5px auto}
-.optionRow label {text-align:left;flex:1}
-.optionRow input {width:60px}
-.starterRow {display:flex;justify-content:space-between;align-items:center;width:260px;margin:10px auto}
-.starterRow select {padding:6px 10px;border-radius:6px;border:none;background:#1b2550;color:white;font-family:'Poppins';cursor:pointer}
+body {
+  margin:0;
+  font-family:'Poppins';
+  background:#0b1020;
+  color:white;
+}
+
+#splash {
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+}
+
+.container {
+  max-width:700px;
+  margin:auto;
+  display:none;
+  padding:10px;
+}
+
+.header {
+  font-size:20px;
+  font-weight:600;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  padding:10px 0;
+}
+
+.cell {
+  perspective:1000px;
+  height:70px;
+}
+
+.inner {
+  width:100%;
+  height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:0.5s;
+}
+
+.cell.flip .inner {
+  transform:rotateY(180deg);
+}
+
+.face {
+  position:absolute;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  backface-visibility:hidden;
+  background:#1b2550;
+  font-weight:600;
+}
+
+.back {
+  transform:rotateY(180deg);
+  background:#020617;
+}
+
+button {
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+input {
+  padding:10px;
+  border-radius:6px;
+  border:none;
+  font-size:16px;
+}
+
+/* jugadores */
+.playerInput {
+  display:block;
+  width:200px;
+  margin:8px auto;
+}
+
+/* opciones */
+.optionRow {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:220px;
+  margin:5px auto;
+}
+
+.optionRow input {
+  width:60px;
+}
+
+/* starter */
+.starterRow {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:260px;
+  margin:10px auto;
+}
+
+.starterRow select {
+  padding:6px 10px;
+  border-radius:6px;
+  border:none;
+  background:#1b2550;
+  color:white;
+  font-family:'Poppins';
+}
+
+/* modal */
+#modal,#endModal {
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.85);
+}
+
+.card {
+  background:#121a33;
+  padding:20px;
+  border-radius:12px;
+  text-align:center;
+  width:90%;
+  max-width:400px;
+}
+
+.playerBoard {
+  display:flex;
+  justify-content:space-around;
+  margin-top:10px;
+}
+
+.active {
+  outline:2px solid #38bdf8;
+}
 </style>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+
 
 <body>
 
@@ -46,26 +186,26 @@ input {padding:8px;border-radius:6px;border:none}
 
   <div id="inputs"></div>
 
-  <!-- OPCIONES -->
   <div id="options" style="display:none">
-  
-  <div class="optionRow">
-    <label>Kabooms</label>
-    <input type="number" id="kabooms" value="5">
+    <div class="optionRow">
+      <label>Kabooms</label>
+      <input type="number" id="kabooms" value="5">
+    </div>
+
+    <div class="optionRow">
+      <label>Corazones</label>
+      <input type="number" id="hearts" value="5">
+    </div>
+
+    <div id="starterSelect" class="starterRow" style="display:none">
+      <label>¿Quién empieza?</label>
+      <select id="starter">
+        <option value="random">Aleatorio</option>
+        <option value="0">Jugador 1</option>
+        <option value="1">Jugador 2</option>
+      </select>
+    </div>
   </div>
-  <div class="optionRow">
-    <label>Corazones</label>
-    <input type="number" id="hearts" value="5">
-  </div>
-  
-<div id="starterSelect" class="starterRow" style="display:none">
-  <label>¿Quién empieza?</label>
-  <select id="starter">
-    <option value="random">Aleatorio</option>
-    <option value="0">Jugador 1</option>
-    <option value="1">Jugador 2</option>
-  </select>
-</div>
 
   <button id="startBtn" style="display:none" onclick="startGame()">Jugar</button>
 </div>
@@ -87,10 +227,8 @@ input {padding:8px;border-radius:6px;border:none}
     <button onclick="toggleAnswer()">Mostrar respuesta</button>
     <p id="a" style="display:none"></p>
     <p><b>¿Se ha acertado la respuesta?</b></p>
-    <div class="actions">
-      <button onclick="answer(true)">Sí (+4)</button>
-      <button onclick="answer(false)">No</button>
-    </div>
+    <button onclick="answer(true)">Sí (+4)</button>
+    <button onclick="answer(false)">No</button>
   </div>
 </div>
 
@@ -109,59 +247,54 @@ function selectPlayers(n){
  let html='';
  for(let i=0;i<n;i++){
   let def = i===0 ? 'Salva' : 'Julia';
-  html += `<input class="playerInput" id="p${i}" value="${def}">`;
+  html += `<input class="playerInput" value="${def}">`;
  }
  inputs.innerHTML = html;
- let n = parseInt(document.querySelectorAll('.playerInput').length);
+
  options.style.display='block';
  startBtn.style.display = 'block';
-
- // Mostrar selector de turno si hay 2 jugadores
  starterSelect.style.display = n==2 ? 'block' : 'none';
 }
 
 async function startGame(){
- let n = parseInt(inputs.dataset.n);
- if (!n) {
-   alert("Selecciona número de jugadores");
-   return;
- }
+
  players=[]; scores=[];
 
- for(let i=0;i<n;i++){
-  players.push(document.getElementById(`p${i}`).value);
+ document.querySelectorAll('.playerInput').forEach(inp=>{
+  players.push(inp.value);
   scores.push(0);
- }
+ });
 
- numKabooms = parseInt(document.getElementById('kabooms').value)||5;
- numHearts = parseInt(document.getElementById('hearts').value)||5;
+ numKabooms = parseInt(kabooms.value)||5;
+ numHearts = parseInt(hearts.value)||5;
 
- let totalCells=30;
- if(numKabooms+numHearts > totalCells){
-  alert('Demasiados elementos');
+ if(numKabooms + numHearts > 30){
+  alert("Demasiados elementos");
   return;
  }
 
  await loadQuestions();
 
- // quién empieza
- if(n==2){
-  let starter = document.getElementById('starter').value;
-  currentPlayer = starter==='random' ? Math.floor(Math.random()*2) : parseInt(starter);
+ if(players.length==2){
+  let s = starter.value;
+  currentPlayer = s==='random' ? Math.floor(Math.random()*2) : parseInt(s);
  }
 
  splash.style.display='none';
  game.style.display='block';
+
  newGame();
 }
 
-function goMenu(){ game.style.display='none'; splash.style.display='flex'; }
+function goMenu(){
+ game.style.display='none';
+ splash.style.display='flex';
+}
 
 async function loadQuestions(){
  try{
   const res = await fetch('preguntas.json');
-  const data = await res.json();
-  questionPool = data.sort(()=>Math.random()-0.5);
+  questionPool = await res.json();
  }catch{
   questionPool=[{q:'2+2',a:'4'}];
  }
@@ -172,9 +305,10 @@ function newGame(){
  grid.innerHTML='';
 
  let letters=['A','B','C','D','E','F'];
-
  let qCount = 30 - numKabooms - numHearts;
+
  remaining = qCount;
+
  let items=[
   ...Array(qCount).fill('q'),
   ...Array(numKabooms).fill('kaboom'),
@@ -184,6 +318,7 @@ function newGame(){
  items.forEach((t,i)=>{
   let row=Math.floor(i/6)+1;
   let col=letters[i%6];
+
   let c=document.createElement('div');
   c.className='cell';
 
@@ -196,13 +331,14 @@ function newGame(){
   c.onclick=()=>clickCell(c,t);
   grid.appendChild(c);
  });
+
  updateUI();
 }
 
 function clickCell(cell,type){
  if(cell.classList.contains('flip')) return;
 
- cell.classList.add('flip'); // 👈 primero giramos
+ cell.classList.add('flip');
 
  let back = cell.querySelector('.back');
 
@@ -217,50 +353,65 @@ function clickCell(cell,type){
   next();
  }
  else{
-  if(questions.length===0){ endGame(); return; }
-
   currentCell=back;
   let q=questions.pop();
-
   document.getElementById('q').innerText=q.q;
   document.getElementById('a').innerText=q.a;
   document.getElementById('a').style.display='none';
   modal.style.display='flex';
  }
 
- // 👇 AHORA sí comprobamos
+ // 👇 FIX DEFINITIVO
  if (document.querySelectorAll('.cell:not(.flip)').length === 0) {
    endGame();
  }
 
  updateUI();
 }
+
 function toggleAnswer(){
- let a=document.getElementById('a');
  a.style.display = a.style.display==='none'?'block':'none';
 }
 
 function answer(ok){
  modal.style.display='none';
  remaining--;
- if(ok){ scores[currentPlayer]+=4; currentCell.innerHTML='Q +4'; }
- else{ currentCell.innerHTML='Q 0'; }
- if(remaining<=0) endGame(); else next();
+
+ if(ok){
+  scores[currentPlayer]+=4;
+  currentCell.innerHTML='Q +4';
+ }else{
+  currentCell.innerHTML='Q 0';
+ }
+
+ if(remaining<=0){
+  endGame();
+ }else{
+  next();
+ }
+
  updateUI();
 }
 
-function next(){ currentPlayer=(currentPlayer+1)%players.length; }
+function next(){
+ currentPlayer=(currentPlayer+1)%players.length;
+}
 
 function updateUI(){
- document.getElementById('turn').innerText='Turno de: '+players[currentPlayer];
- document.getElementById('remaining').innerText='Total preguntas: '+remaining;
- document.getElementById('players').innerHTML = players.map((p,i)=>
+ turn.innerText='Turno de: '+players[currentPlayer];
+ remaining.innerText='Total preguntas: '+remaining;
+
+ playersDiv = players.map((p,i)=>
   `<div class="${i===currentPlayer?'active':''}">${p}: ${scores[i]}</div>`
  ).join('');
+
+ document.getElementById('players').innerHTML = playersDiv;
 }
 
 function endGame(){
- let winner = players.map((p,i)=>({p,score:scores[i]})).sort((a,b)=>b.score-a.score)[0];
+
+ let winner = players.map((p,i)=>({p,score:scores[i]}))
+  .sort((a,b)=>b.score-a.score)[0];
 
  endContent.innerHTML = `
   <h2>🎉 Ganador 🎉</h2>
