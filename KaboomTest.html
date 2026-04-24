@@ -25,6 +25,12 @@ input {padding:8px;border-radius:6px;border:none}
 .actions {display:flex;gap:10px;justify-content:center;margin-top:10px}
 .playerBoard {display:flex;justify-content:space-around;margin-top:10px}
 .active {outline:2px solid #38bdf8}
+.playerInput {display:block;width: 80%;max-width: 250px;margin: 8px auto;padding:10px;font-size:16px}
+.optionRow {display:flex;justify-content:space-between;align-items:center;width:220px;margin:5px auto}
+.optionRow label {text-align:left;flex:1}
+.optionRow input {width:60px}
+.starterRow {display:flex;justify-content:space-between;align-items:center;width:260px;margin:10px auto}
+.starterRow select {padding:6px 10px;border-radius:6px;border:none;background:#1b2550;color:white;font-family:'Poppins';cursor:pointer}
 </style>
 </head>
 
@@ -42,17 +48,24 @@ input {padding:8px;border-radius:6px;border:none}
 
   <!-- OPCIONES -->
   <div id="options" style="display:none">
-    <p>Kabooms: <input type="number" id="kabooms" value="5"></p>
-    <p>Corazones: <input type="number" id="hearts" value="5"></p>
-    <div id="starterSelect" style="display:none">
-      <p>¿Quién empieza?</p>
-      <select id="starter">
-        <option value="random">Aleatorio</option>
-        <option value="0">Jugador 1</option>
-        <option value="1">Jugador 2</option>
-      </select>
-    </div>
+  
+  <div class="optionRow">
+    <label>Kabooms</label>
+    <input type="number" id="kabooms" value="5">
   </div>
+  <div class="optionRow">
+    <label>Corazones</label>
+    <input type="number" id="hearts" value="5">
+  </div>
+  
+<div id="starterSelect" class="starterRow" style="display:none">
+  <label>¿Quién empieza?</label>
+  <select id="starter">
+    <option value="random">Aleatorio</option>
+    <option value="0">Jugador 1</option>
+    <option value="1">Jugador 2</option>
+  </select>
+</div>
 
   <button id="startBtn" style="display:none" onclick="startGame()">Jugar</button>
 </div>
@@ -96,7 +109,7 @@ function selectPlayers(n){
  let html='';
  for(let i=0;i<n;i++){
   let def = i===0 ? 'Salva' : 'Julia';
-  html += `<input id="p${i}" value="${def}"><br>`;
+  html += `<input class="playerInput" id="p${i}" value="${def}">`;
  }
  inputs.innerHTML = html;
  inputs.dataset.n = n;
