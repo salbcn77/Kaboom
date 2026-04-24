@@ -152,12 +152,12 @@ async function loadQuestions(){
 
 function newGame(){
  questions=[...questionPool];
- remaining=questions.length;
  grid.innerHTML='';
 
  let letters=['A','B','C','D','E','F'];
 
  let qCount = 30 - numKabooms - numHearts;
+ remaining = qCount;
  let items=[
   ...Array(qCount).fill('q'),
   ...Array(numKabooms).fill('kaboom'),
@@ -183,6 +183,10 @@ function newGame(){
 }
 
 function clickCell(cell,type){
+ if (document.querySelectorAll('.cell:not(.flip)').length === 0) {
+   endGame();
+ }
+
  if(cell.classList.contains('flip')) return;
  cell.classList.add('flip');
  let back = cell.querySelector('.back');
