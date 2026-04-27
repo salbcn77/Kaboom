@@ -361,11 +361,6 @@ function clickCell(cell,type){
   modal.style.display='flex';
  }
 
- // 👇 FIX DEFINITIVO
- if (document.querySelectorAll('.cell:not(.flip)').length === 0) {
-   endGame();
- }
-
  updateUI();
 }
 
@@ -418,7 +413,6 @@ function endGame(){
   <h1>${winner.p}</h1>
   <p>${winner.score} puntos</p>
   <br>
-  <button onclick="newGame(); endModal.style.display='none'">Nueva partida</button>
   <button onclick="goMenu(); endModal.style.display='none'">Menú principal</button>
  `;
 
