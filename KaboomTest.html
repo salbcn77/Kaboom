@@ -242,7 +242,6 @@ let questions=[], questionPool=[];
 let remaining=0;
 let currentCell=null;
 let numKabooms=5, numHearts=5;
-let lockBoard = false;
 
 function selectPlayers(n){
  let html='';
@@ -337,7 +336,6 @@ function newGame(){
 }
 
 function clickCell(cell,type){
- if(lockBoard) return;
  if(cell.classList.contains('flip')) return;
 
  cell.classList.add('flip');
@@ -355,7 +353,6 @@ function clickCell(cell,type){
   next();
  }
  else{
- lockBoard = true; 
   currentCell=back;
   let q=questions.pop();
   document.getElementById('q').innerText=q.q;
