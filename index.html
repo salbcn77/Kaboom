@@ -187,6 +187,53 @@ input {
   border-radius: 10px;
 }
 
+.btn {
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.2s;
+}
+
+/* SÍ (verde) */
+.btn.yes {
+  background: #22c55e;
+  color: white;
+  box-shadow: 0 4px 0 #15803d;
+}
+
+/* NO (rojo) */
+.btn.no {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 0 #991b1b;
+}
+
+/* efecto hover (desktop) */
+.btn:hover {
+  filter: brightness(1.1);
+}
+
+/* efecto pulsación */
+.btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 transparent;
+}
+
+/* animación extra tipo “rebote suave” */
+
+.btn.clicked {
+  animation: pop 0.2s ease;
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
 
 </style>
 
@@ -257,8 +304,8 @@ if ("serviceWorker" in navigator) {
     <p id="a" style="display:none"></p>
     <p class="answerLabel">¿Se ha acertado la respuesta?</p>
     <div class="answerButtons">
-        <button onclick="answer(true)">Sí (+4)</button>
-        <button onclick="answer(false)">No</button>
+        <button class="btn yes" onclick="answer(true)">Sí (+4)</button>
+        <button class="btn no" onclick="answer(false)">No</button>
     </div>
   </div>
 </div>
@@ -441,24 +488,29 @@ function toggleAnswer(){
 }
 
 function answer(ok){
- lockboard = false;
- modal.style.display='none';
- remaining--;
+  const btn = event.target;
 
- if(ok){
-  scores[currentPlayer]+=4;
-  currentCell.innerHTML='Q +4';
- }else{
-  currentCell.innerHTML='Q 0';
- }
+  // animación
+  btn.classList.add('clicked');
+  setTimeout(()=>btn.classList.remove('clicked'), 200);
+  
+  modal.style.display='none';
+  remaining--;
 
-if (openedCells >=30){
+  if(ok){
+    scores[currentPlayer]+=4;
+    currentCell.innerHTML='Q +4';
+  }else{
+    currentCell.innerHTML='Q 0';
+  }
+
+  if (openedCells >=30){
     endGame();
-} else {
+  } else {
     next();
-}
+  }
 
- updateUI();
+  updateUI();
 }
 
 function next(){
@@ -485,11 +537,8 @@ function endGame(){
   <h2>🎉 Ganador 🎉</h2>
   <h1>${winner.p}</h1>
   <p>${winner.score} puntos</p>
-  
-  <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="200">
-  
+  <img src="gatito.png" width="200">
   <br><br>
-  
   <button onclick="goMenu(); endModal.style.display='none'">Menú principal</button>
  `;
 
