@@ -2,17 +2,58 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" id="themeColor" content="#0b1020">
 <title>Kaboom</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <style>
-body {
+:root, [data-theme="dark"] {
+  --bg: #0b1020;
+  --text: #ffffff;
+  --card: #121a33;
+  --cell-face: #1b2550;
+  --cell-back: #020617;
+  --input-bg: #ffffff;
+  --input-text: #000000;
+  --select-bg: #1b2550;
+  --select-text: #ffffff;
+  --btn-bg: #1e293b;
+  --btn-text: #ffffff;
+  --overlay: rgba(0,0,0,.85);
+  --border: #38bdf8;
+  --theme-btn-inactive: #1e293b;
+}
+[data-theme="light"] {
+  --bg: #f0f2f5;
+  --text: #1a1a2e;
+  --card: #ffffff;
+  --cell-face: #e2e8f0;
+  --cell-back: #cbd5e1;
+  --input-bg: #ffffff;
+  --input-text: #1a1a2e;
+  --select-bg: #ffffff;
+  --select-text: #1a1a2e;
+  --btn-bg: #ffffff;
+  --btn-text: #1a1a2e;
+  --overlay: rgba(0,0,0,.3);
+  --border: #2563eb;
+  --theme-btn-inactive: #e2e8f0;
+}
+
+html,body {
+  touch-action: manipulation;
+  overscroll-behavior: none;
   margin:0;
   font-family:'Poppins';
-  background:#0b1020;
-  color:white;
+  background:var(--bg);
+  color:var(--text);
 }
 
 #splash {
@@ -32,11 +73,46 @@ body {
   margin:auto;
   display:none;
   padding:10px;
+  padding-top:0;
 }
 
 .header {
   font-size:20px;
   font-weight:600;
+}
+
+.gameTop {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  margin-bottom:6px;
+  border-bottom:1px solid var(--cell-face);
+}
+.backBtn {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  padding:0;
+}
+.turnBadge {
+  text-align:center;
+  padding:10px;
+  border-radius:10px;
+  background:var(--cell-face);
+  font-weight:700;
+  font-size:15px;
+  margin-bottom:8px;
+}
+.remainingBar {
+  text-align:center;
+  font-size:12px;
+  opacity:0.55;
+  margin-bottom:4px;
 }
 
 .grid {
@@ -49,6 +125,27 @@ body {
 .cell {
   perspective:1000px;
   height:70px;
+  touch-action: manipulation;
+}
+
+.inner {
+  width:100%;
+  height:100%;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:0.5s;
+}
+
+.cell.flip .inner {
+  transform:rotateY(180deg);
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  padding:10px 0;
+  touch-action: manipulation;
 }
 
 .inner {
@@ -72,13 +169,13 @@ body {
   justify-content:center;
   border-radius:10px;
   backface-visibility:hidden;
-  background:#1b2550;
+  background:var(--cell-face);
   font-weight:600;
 }
 
 .back {
   transform:rotateY(180deg);
-  background:#020617;
+  background:var(--cell-back);
 }
 
 button {
@@ -86,6 +183,8 @@ button {
   border:none;
   border-radius:8px;
   cursor:pointer;
+  background:var(--btn-bg);
+  color:var(--btn-text);
 }
 
 input {
@@ -93,16 +192,19 @@ input {
   border-radius:6px;
   border:none;
   font-size:16px;
+  background:var(--input-bg);
+  color:var(--input-text);
 }
 
-/* jugadores */
 .playerInput {
   display:block;
-  width:200px;
-  margin:8px auto;
+  width:100%;
+  max-width:220px;
+  margin:0 auto;
+  box-sizing:border-box;
+  text-align:center;
 }
 
-/* opciones */
 .optionRow {
   display:flex;
   justify-content:space-between;
@@ -115,7 +217,6 @@ input {
   width:60px;
 }
 
-/* starter */
 .starterRow {
   display:flex;
   justify-content:space-between;
@@ -128,23 +229,43 @@ input {
   padding:6px 10px;
   border-radius:6px;
   border:none;
-  background:#1b2550;
-  color:white;
+  background:var(--select-bg);
+  color:var(--select-text);
   font-family:'Poppins';
 }
 
-/* modal */
+.themeRow {
+  display:flex;
+  gap:10px;
+}
+
+.theme-btn {
+  padding:8px 16px;
+  border-radius:8px;
+  border:2px solid transparent;
+  cursor:pointer;
+  font-family:'Poppins';
+  font-weight:600;
+  background:var(--theme-btn-inactive);
+  color:var(--text);
+  transition:0.2s;
+}
+
+.theme-btn.active {
+  border-color:var(--border);
+}
+
 #modal,#endModal {
   position:fixed;
   inset:0;
   display:none;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,.85);
+  background:var(--overlay);
 }
 
 .card {
-  background:#121a33;
+  background:var(--card);
   padding:20px;
   border-radius:12px;
   text-align:center;
@@ -159,13 +280,13 @@ input {
 }
 
 .active {
-  outline:2px solid #38bdf8;
+  outline:2px solid var(--border);
 }
 
 .answerLabel {
-    font-size: 14px;
-    opacity: 0.7;
-    margin-top: 15px;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-top: 15px;
 }
 
 #q {
@@ -198,32 +319,42 @@ input {
   transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.2s;
 }
 
-/* SÍ (verde) */
 .btn.yes {
   background: #22c55e;
   color: white;
   box-shadow: 0 4px 0 #15803d;
 }
 
-/* NO (rojo) */
 .btn.no {
   background: #ef4444;
   color: white;
   box-shadow: 0 4px 0 #991b1b;
 }
 
-/* efecto hover (desktop) */
+#startBtn {
+  font-size:18px;
+  font-weight:700;
+  padding:14px 48px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  box-shadow:0 4px 0 #15803d;
+  transition:0.1s;
+  margin-top:4px;
+}
+#startBtn:active {
+  transform:translateY(4px);
+  box-shadow:none;
+}
+
 .btn:hover {
   filter: brightness(1.1);
 }
 
-/* efecto pulsación */
 .btn:active {
   transform: translateY(4px);
   box-shadow: 0 0 0 transparent;
 }
-
-/* animación extra tipo “rebote suave” */
 
 .btn.clicked {
   animation: pop 0.2s ease;
@@ -235,12 +366,105 @@ input {
   100% { transform: scale(1); }
 }
 
-</style>
+body.modal-open {
+  overflow: hidden;
+}
 
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+.playerCard {
+  background:var(--card);
+  border-radius:14px;
+  padding:18px 20px;
+  margin:10px auto;
+  border:1px solid var(--border);
+  width:100%;
+  max-width:340px;
+  box-sizing:border-box;
+}
+.playerCardHeader {
+  font-weight:700;
+  font-size:17px;
+  margin-bottom:12px;
+  text-align:center;
+  color:var(--border);
+}
+.playerCardBody {
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:center;
+}
+.field {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:center;
+  width:100%;
+}
+.field label {
+  font-size:11px;
+  opacity:0.6;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+}
+
+.avatarRow {
+  display:flex;
+  gap:6px;
+}
+
+.avatar {
+  font-size:26px;
+  cursor:pointer;
+  padding:4px 6px;
+  border-radius:8px;
+  border:2px solid transparent;
+  transition:0.15s;
+  background:var(--cell-face);
+  user-select:none;
+}
+
+.avatar.selected {
+  border-color:var(--border);
+  background:var(--card);
+}
+
+.diffSelect {
+  padding:6px 12px;
+  border-radius:8px;
+  border:none;
+  background:var(--select-bg);
+  color:var(--select-text);
+  font-family:'Poppins';
+  font-size:14px;
+  width:160px;
+  text-align:center;
+}
+
+.scoreboard {
+  margin-top:15px;
+  width:100%;
+  max-width:300px;
+}
+.scoreboard h3 {
+  margin:0 0 8px;
+  font-size:16px;
+}
+.scoreRow {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:5px 10px;
+  border-radius:6px;
+  background:var(--cell-face);
+  margin:4px 0;
+  font-size:14px;
+}
+.scoreRow.gold {
+  background:linear-gradient(135deg,#f59e0b,#d97706);
+  color:#1a1a2e;
+  font-weight:700;
+}
+</style>
 </head>
 
 <script>
@@ -249,11 +473,15 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-
 <body>
 
 <div id="splash">
   <h1>💣 KABOOM!</h1>
+
+  <div class="themeRow">
+    <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">🌙 Oscuro</button>
+    <button class="theme-btn" data-theme="light" onclick="setTheme('light')">☀️ Claro</button>
+  </div>
 
   <div>
     <button onclick="selectPlayers(1)">1 jugador</button>
@@ -284,16 +512,19 @@ if ("serviceWorker" in navigator) {
   </div>
 
   <button id="startBtn" style="display:none" onclick="startGame()">Jugar</button>
+
+  <div id="scoreboard" class="scoreboard"></div>
 </div>
 
 <div class="container" id="game">
-  <div class="header">💣 Kaboom</div>
-  <div id="remaining"></div>
-  <div id="turn"></div>
+  <div class="gameTop">
+    <div class="header">💣 Kaboom</div>
+    <button class="backBtn" onclick="confirmGoMenu()">✕</button>
+  </div>
+  <div id="turn" class="turnBadge"></div>
   <div id="players" class="playerBoard"></div>
+  <div id="remaining" class="remainingBar"></div>
   <div class="grid" id="grid"></div>
-  <button onclick="newGame()">Nueva Partida</button>
-  <button onclick="goMenu()">Menú Principal</button>
 </div>
 
 <div id="modal">
@@ -304,8 +535,8 @@ if ("serviceWorker" in navigator) {
     <p id="a" style="display:none"></p>
     <p class="answerLabel">¿Se ha acertado la respuesta?</p>
     <div class="answerButtons">
-        <button class="btn yes" onclick="answer(true)">Sí (+4)</button>
-        <button class="btn no" onclick="answer(false)">No</button>
+      <button class="btn yes" onclick="answer(true, event)">Sí (+4)</button>
+      <button class="btn no" onclick="answer(false, event)">No</button>
     </div>
   </div>
 </div>
@@ -316,191 +547,318 @@ if ("serviceWorker" in navigator) {
 
 <script>
 let players=[], scores=[], currentPlayer=0;
-let questions=[], questionPool=[];
+let easyQuestions=[], hardQuestions=[], easyPool=[], hardPool=[], playerDifficulties=[];
 let remaining=0;
 let currentCell=null;
 let numKabooms=5, numHearts=5;
-let openedCells = 0;
+let openedCells=0;
+let playerAvatars=[];
 
+const avatars=[
+  {id:'guerrero', emoji:'⚔️', label:'Guerrero'},
+  {id:'princesa', emoji:'👸', label:'Princesa'},
+  {id:'panda', emoji:'🐼', label:'Oso Panda'},
+  {id:'capybara', emoji:'🐹', label:'Capybara'},
+  {id:'buho', emoji:'🦉', label:'Búho'},
+  {id:'gatito', emoji:'🐱', label:'Gatito'},
+];
+
+function pickAvatar(player, id){
+  document.querySelectorAll('#avatars-'+player+' .avatar').forEach(function(el){
+    el.classList.toggle('selected', el.dataset.avatar===id);
+  });
+}
+
+function getAvatarEmoji(id){
+  var a=avatars.find(function(a){return a.id===id;});
+  return a ? a.emoji : '🐱';
+}
+
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('kaboom-theme', theme);
+  document.getElementById('themeColor').content = theme === 'dark' ? '#0b1020' : '#f0f2f5';
+  document.querySelectorAll('.theme-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.theme === theme);
+  });
+}
+
+(function initTheme(){
+  var saved = localStorage.getItem('kaboom-theme') || 'dark';
+  setTheme(saved);
+  renderScores();
+})();
+
+function esc(str){
+  var el = document.createElement('span');
+  el.textContent = str;
+  return el.innerHTML;
+}
 
 function shuffle(array){
- for(let i = array.length - 1; i > 0; i--){
-  let j = Math.floor(Math.random() * (i + 1));
-  [array[i], array[j]] = [array[j], array[i]];
- }
- return array;
+  for(let i = array.length - 1; i > 0; i--){
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function vibrate(pattern){
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+function getScores(){
+  try{
+    return JSON.parse(localStorage.getItem('kaboom-scores')) || [];
+  }catch{
+    return [];
+  }
+}
+
+function saveScore(name, avatar, score){
+  var scores = getScores();
+  scores.push({name:name, avatar:avatar, score:score, date:Date.now()});
+  scores.sort(function(a,b){return b.score - a.score;});
+  if (scores.length > 5) scores.length = 5;
+  localStorage.setItem('kaboom-scores', JSON.stringify(scores));
+  renderScores();
+}
+
+function renderScores(){
+  var scores = getScores();
+  var el = document.getElementById('scoreboard');
+  if (scores.length === 0){
+    el.innerHTML = '';
+    return;
+  }
+  var html = '<h3>🏆 Mejores puntuaciones</h3>';
+  scores.forEach(function(s, i){
+    var cls = i === 0 ? 'scoreRow gold' : 'scoreRow';
+    html += '<div class="' + cls + '"><span>' + (i+1) + '. ' + getAvatarEmoji(s.avatar) + ' ' + esc(s.name) + '</span><span>' + s.score + '</span></div>';
+  });
+  el.innerHTML = html;
 }
 
 function updateStarterNames(){
- const inputs = document.querySelectorAll('.playerInput');
-
- const name1 = inputs[0]?.value || 'Jugador 1';
- const name2 = inputs[1]?.value || 'Jugador 2';
-
- starter.innerHTML = `
-  <option value="random">Aleatorio</option>
-  <option value="0">${name1}</option>
-  <option value="1">${name2}</option>
- `;
+  const inputs = document.querySelectorAll('.playerInput');
+  const name1 = inputs[0]?.value || 'Jugador 1';
+  const name2 = inputs[1]?.value || 'Jugador 2';
+  starter.innerHTML =
+    '<option value="random">Aleatorio</option>' +
+    '<option value="0">' + esc(name1) + '</option>' +
+    '<option value="1">' + esc(name2) + '</option>';
 }
 
-
 function selectPlayers(n){
- let html='';
- for(let i=0;i<n;i++){
-  let def = i===0 ? 'Salva' : 'Julia';
-  html += `<input class="playerInput" value="${def}">`;
- }
- inputs.innerHTML = html;
- updateStarterNames();
- 
- document.querySelectorAll('.playerInput').forEach(inp=>{
-  inp.addEventListener('input', updateStarterNames);
-});
+  let html='';
+  for(let i=0;i<n;i++){
+    let num = i + 1;
+    let def = i===0 ? 'Salva' : 'Julia';
+    let defaultAvatar = i===0 ? 'guerrero' : 'princesa';
+    html += '<div class="playerCard">';
+    html += '<div class="playerCardHeader">👤 Jugador ' + num + '</div>';
+    html += '<div class="playerCardBody">';
+    html += '<div class="field"><label>Nombre</label><input class="playerInput" value="' + esc(def) + '"></div>';
+    html += '<div class="field"><label>Avatar</label><div class="avatarRow" id="avatars-'+i+'">';
+    avatars.forEach(function(a){
+      var sel = a.id===defaultAvatar ? ' selected' : '';
+      html += '<span class="avatar'+sel+'" data-player="'+i+'" data-avatar="'+a.id+'" onclick="pickAvatar('+i+',\''+a.id+'\')">'+a.emoji+'</span>';
+    });
+    html += '</div></div>';
+    html += '<div class="field"><label>Preguntas</label><select class="diffSelect">';
+    html += '<option value="easy">📗 Fáciles</option>';
+    html += '<option value="hard">📕 Difíciles</option>';
+    html += '</select></div>';
+    html += '</div></div>';
+  }
+  inputs.innerHTML = html;
+  updateStarterNames();
 
- options.style.display='block';
- startBtn.style.display = 'block';
- starterSelect.style.display = n==2 ? 'block' : 'none';
+  document.querySelectorAll('.playerInput').forEach(function(inp){
+    inp.addEventListener('input', updateStarterNames);
+  });
+
+  options.style.display='block';
+  startBtn.style.display = 'block';
+  starterSelect.style.display = n==2 ? 'block' : 'none';
+}
+
+function openModal(el){
+  el.style.display='flex';
+  document.body.classList.add('modal-open');
+}
+
+function closeModal(el){
+  el.style.display='none';
+  if (modal.style.display!=='flex' && endModal.style.display!=='flex'){
+    document.body.classList.remove('modal-open');
+  }
 }
 
 async function startGame(){
+  players=[]; scores=[]; playerAvatars=[]; playerDifficulties=[];
 
- players=[]; scores=[];
+  document.querySelectorAll('.playerCard').forEach(function(block){
+    players.push(block.querySelector('.playerInput').value);
+    scores.push(0);
+    var sel = block.querySelector('.avatar.selected');
+    playerAvatars.push(sel ? sel.dataset.avatar : 'gatito');
+    playerDifficulties.push(block.querySelector('.diffSelect').value);
+  });
 
- document.querySelectorAll('.playerInput').forEach(inp=>{
-  players.push(inp.value);
-  scores.push(0);
- });
+  numKabooms = parseInt(kabooms.value)||5;
+  numHearts = parseInt(hearts.value)||5;
 
- numKabooms = parseInt(kabooms.value)||5;
- numHearts = parseInt(hearts.value)||5;
+  if(numKabooms + numHearts > 30){
+    alert("Demasiados elementos");
+    return;
+  }
 
- if(numKabooms + numHearts > 30){
-  alert("Demasiados elementos");
-  return;
- }
+  await loadQuestions();
 
- await loadQuestions();
+  if(players.length==2){
+    let s = starter.value;
+    currentPlayer = s==='random' ? Math.floor(Math.random()*2) : parseInt(s);
+  }
 
- if(players.length==2){
-  let s = starter.value;
-  currentPlayer = s==='random' ? Math.floor(Math.random()*2) : parseInt(s);
- }
+  splash.style.display='none';
+  game.style.display='block';
 
- splash.style.display='none';
- game.style.display='block';
+  newGame();
+}
 
- newGame();
+function confirmGoMenu(){
+  if (confirm('¿Volver al menú principal? Se perderá la partida actual.')){
+    goMenu();
+  }
 }
 
 function goMenu(){
- game.style.display='none';
- splash.style.display='flex';
+  game.style.display='none';
+  splash.style.display='flex';
+  closeModal(endModal);
 }
 
 async function loadQuestions(){
- try{
-  const res = await fetch('preguntas.json');
-  questionPool = await res.json();
- }catch{
-  questionPool=[{q:'2+2',a:'4'}];
- }
+  try{
+    var r1 = await fetch('preguntas.json');
+    easyPool = await r1.json();
+  }catch{
+    easyPool=[{q:'2+2',a:'4'}];
+  }
+  try{
+    var r2 = await fetch('preguntas-dificiles.json');
+    hardPool = await r2.json();
+  }catch{
+    hardPool=[{q:'?',a:'?'}];
+  }
 }
 
 function newGame(){
- questions = shuffle([...questionPool]);
- grid.innerHTML='';
+  easyQuestions = shuffle([...easyPool]);
+  hardQuestions = shuffle([...hardPool]);
+  openedCells = 0;
+  grid.innerHTML='';
 
- let letters=['A','B','C','D','E','F'];
- let qCount = 30 - numKabooms - numHearts;
+  let letters=['A','B','C','D','E','F'];
+  let qCount = 30 - numKabooms - numHearts;
 
- remaining = qCount;
+  remaining = qCount;
 
- let items=[
-  ...Array(qCount).fill('q'),
-  ...Array(numKabooms).fill('kaboom'),
-  ...Array(numHearts).fill('heart')
- ].sort(()=>Math.random()-0.5);
+  let items=[
+    ...Array(qCount).fill('q'),
+    ...Array(numKabooms).fill('kaboom'),
+    ...Array(numHearts).fill('heart')
+  ];
+  shuffle(items);
 
- items.forEach((t,i)=>{
-  let row=Math.floor(i/6)+1;
-  let col=letters[i%6];
+  items.forEach((t,i)=>{
+    let row=Math.floor(i/6)+1;
+    let col=letters[i%6];
 
-  let c=document.createElement('div');
-  c.className='cell';
+    let c=document.createElement('div');
+    c.className='cell';
 
-  c.innerHTML=`
-   <div class="inner">
-     <div class="face">${col}${row}</div>
-     <div class="face back"></div>
-   </div>`;
+    c.innerHTML=
+      '<div class="inner">' +
+        '<div class="face">' + col + row + '</div>' +
+        '<div class="face back"></div>' +
+      '</div>';
 
-  c.onclick=()=>clickCell(c,t);
-  grid.appendChild(c);
- });
+    c.onclick=()=>clickCell(c,t);
+    grid.appendChild(c);
+  });
 
- updateUI();
+  updateUI();
 }
 
 function clickCell(cell,type){
- if(cell.classList.contains('flip')) return;
+  if(cell.classList.contains('flip')) return;
 
- cell.classList.add('flip');
- openedCells++;
+  cell.classList.add('flip');
+  openedCells++;
 
- let back = cell.querySelector('.back');
+  let back = cell.querySelector('.back');
 
- if(type==='heart'){
-  scores[currentPlayer]+=5;
-  back.innerHTML='❤️ +5';
-  next();
-  
-  if(openedCells >= 30) {
-    endGame();
+  if(type==='heart'){
+    scores[currentPlayer]+=5;
+    back.innerHTML='❤️ +5';
+    next();
+
+    if(openedCells >= 30) {
+      endGame();
+    }
   }
-  
- }
- else if(type==='kaboom'){
-  scores[currentPlayer]-=5;
-  back.innerHTML='💣';
-  next();
-  
-  if(openedCells >= 30) {
-    endGame();
+  else if(type==='kaboom'){
+    scores[currentPlayer]-=5;
+    back.innerHTML='💣';
+    vibrate(100);
+    next();
+
+    if(openedCells >= 30) {
+      endGame();
+    }
+  }
+  else{
+    var pool = playerDifficulties[currentPlayer] === 'hard' ? hardQuestions : easyQuestions;
+    if (pool.length === 0) {
+      back.innerHTML='?';
+      next();
+      if (openedCells >= 30) endGame();
+      updateUI();
+      return;
+    }
+    currentCell=back;
+    let q=pool.pop();
+    document.getElementById('q').textContent=q && q.q || '?';
+    document.getElementById('a').textContent=q && q.a || '?';
+    document.getElementById('a').style.display='none';
+    openModal(modal);
   }
 
-  
- }
- else{
-  currentCell=back;
-  let q=questions.pop();
-  document.getElementById('q').innerText=q.q;
-  document.getElementById('a').innerText=q.a;
-  document.getElementById('a').style.display='none';
-  modal.style.display='flex';
- }
-
- updateUI();
+  updateUI();
 }
 
 function toggleAnswer(){
- a.style.display = a.style.display==='none'?'block':'none';
+  var el = document.getElementById('a');
+  el.style.display = el.style.display==='none'?'block':'none';
 }
 
-function answer(ok){
-  const btn = event.target;
+function answer(ok, e){
+  const btn = e.target;
 
-  // animación
   btn.classList.add('clicked');
   setTimeout(()=>btn.classList.remove('clicked'), 200);
-  
-  modal.style.display='none';
-  remaining--;
+
+  closeModal(modal);
+  remaining = Math.max(0, remaining - 1);
 
   if(ok){
     scores[currentPlayer]+=4;
     currentCell.innerHTML='Q +4';
   }else{
+    vibrate(200);
+    scores[currentPlayer]+=0;
     currentCell.innerHTML='Q 0';
   }
 
@@ -514,55 +872,69 @@ function answer(ok){
 }
 
 function next(){
- currentPlayer=(currentPlayer+1)%players.length;
+  currentPlayer=(currentPlayer+1)%players.length;
 }
 
 function updateUI(){
- turn.innerText='Turno de: '+players[currentPlayer];
- remaining.innerText='Total preguntas: '+remaining;
+  document.getElementById('turn').textContent='Turno de: ' + getAvatarEmoji(playerAvatars[currentPlayer]) + ' ' + players[currentPlayer];
+  document.getElementById('remaining').textContent='Quedan ' + remaining + ' preguntas';
 
- playersDiv = players.map((p,i)=>
-  `<div class="${i===currentPlayer?'active':''}">${p}: ${scores[i]}</div>`
- ).join('');
+  let playersDiv = players.map(function(p,i){
+    var diffIcon = playerDifficulties[i] === 'hard' ? '📕' : '📗';
+    return '<div class="' + (i===currentPlayer?'active':'') + '">' + getAvatarEmoji(playerAvatars[i]) + ' ' + esc(p) + ' ' + diffIcon + ': ' + scores[i] + '</div>';
+  }).join('');
 
- document.getElementById('players').innerHTML = playersDiv;
+  document.getElementById('players').innerHTML = playersDiv;
 }
 
 function endGame(){
+  let sorted = players.map(function(p,i){return {p:p,score:scores[i],avatar:playerAvatars[i]};})
+    .sort(function(a,b){return b.score-a.score;});
+  let winner = sorted[0];
+  let tied = sorted.filter(function(p){return p.score===winner.score;});
 
- let winner = players.map((p,i)=>({p,score:scores[i]}))
-  .sort((a,b)=>b.score-a.score)[0];
+  let msg;
+  if (tied.length > 1) {
+    msg = '<h2>🎉 Empate 🎉</h2><h1>' + tied.map(function(p){return getAvatarEmoji(p.avatar)+' '+esc(p.p);}).join(' y ') + '</h1>';
+  } else {
+    msg = '<h2>🎉 Ganador 🎉</h2><h1>' + getAvatarEmoji(winner.avatar)+' '+esc(winner.p) + '</h1>';
+  }
 
- endContent.innerHTML = `
-  <h2>🎉 Ganador 🎉</h2>
-  <h1>${winner.p}</h1>
-  <p>${winner.score} puntos</p>
-  <img src="gatito.png" width="200">
-  <br><br>
-  <button onclick="goMenu(); endModal.style.display='none'">Menú principal</button>
- `;
+  endContent.innerHTML = msg + '<p>' + winner.score + ' puntos</p><br><img src="gatito.png" width="180" style="border-radius:12px;"><br><br><button onclick="goMenu(); closeModal(endModal)">Menú principal</button>';
 
- endModal.style.display='flex';
- confetti();
+  openModal(endModal);
+  vibrate([100, 50, 200, 50, 100]);
+  saveScore(winner.p, winner.avatar, winner.score);
+  if (tied.length > 1) {
+    for (var si = 1; si < tied.length; si++) {
+      saveScore(tied[si].p, tied[si].avatar, tied[si].score);
+    }
+  }
+  confetti();
 }
 
 function confetti(){
- for(let i=0;i<80;i++){
-  let c=document.createElement('div');
-  c.style.position='fixed';
-  c.style.width='6px';
-  c.style.height='6px';
-  c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-  c.style.top='0';
-  c.style.left=Math.random()*100+'%';
-  document.body.appendChild(c);
-
-  let fall=setInterval(()=>{
-    c.style.top=(parseFloat(c.style.top)+5)+'px';
-  },30);
-
-  setTimeout(()=>{clearInterval(fall); c.remove();},2000);
- }
+  const particles = [];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;width:6px;height:6px;background:hsl(' + Math.random()*360 + ',100%,50%);top:-6px;left:' + Math.random()*100 + '%;border-radius:50%;pointer-events:none;z-index:9999';
+    document.body.appendChild(el);
+    particles.push({ el: el, y: -6, speed: 2 + Math.random() * 4 });
+  }
+  const start = performance.now();
+  function frame(){
+    const elapsed = performance.now() - start;
+    if (elapsed >= 2500){
+      particles.forEach(function(p){ p.el.remove(); });
+      return;
+    }
+    for (var i = 0; i < particles.length; i++) {
+      particles[i].y += particles[i].speed;
+      particles[i].el.style.top = particles[i].y + 'px';
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 </script>
 

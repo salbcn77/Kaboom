@@ -1,14 +1,24 @@
-const CACHE = "kaboom-v1";
+const CACHE = "kaboom-v3";
 
 self.addEventListener("install", e => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(cache => {
       return cache.addAll([
         "./",
-        "./Kaboom.htm",
-        "./preguntas.json"
+        "./index.html",
+        "./preguntas.json",
+        "./preguntas-dificiles.json"
       ]);
     })
+  );
+});
+
+self.addEventListener("activate", e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
 });
 
